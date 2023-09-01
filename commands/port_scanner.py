@@ -1,17 +1,13 @@
 import json
 import re
 from typing import Any, Optional
-#from typing import Optional
-
 import nmap
-import openai
 import requests
-model_engine = "gpt-3.5-turbo-0613"
+
+model_engine = "text-davinci-003"
 nm = nmap.PortScanner()
 
-
 def extract_data(json_string: str) -> Any:
-    # Define the regular expression patterns for individual values
     critical_score_pattern = r'"critical score": \["(.*?)"\]'
     os_information_pattern = r'"os information": \["(.*?)"\]'
     open_ports_pattern = r'"open ports": \["(.*?)"\]'
@@ -19,7 +15,6 @@ def extract_data(json_string: str) -> Any:
     vulnerable_service_pattern = r'"vulnerable service": \["(.*?)"\]'
     found_cve_pattern = r'"found cve": \["(.*?)"\]'
 
-    # Initialize variables for extracted data
     critical_score = None
     os_information = None
     open_ports = None
@@ -27,7 +22,6 @@ def extract_data(json_string: str) -> Any:
     vulnerable_service = None
     found_cve = None
 
-    # Extract individual values using patterns
     match = re.search(critical_score_pattern, json_string)
     if match:
         critical_score = match.group(1)
@@ -52,7 +46,6 @@ def extract_data(json_string: str) -> Any:
     if match:
         found_cve = match.group(1)
 
-    # Create a dictionary to store the extracted data
     data = {
         "critical score": critical_score,
         "os information": os_information,
@@ -62,7 +55,6 @@ def extract_data(json_string: str) -> Any:
         "found cve": found_cve
     }
 
-    # Convert the dictionary to JSON format
     json_output = json.dumps(data)
 
     return json_output
@@ -77,9 +69,9 @@ def BardAI(key: str, data: Any) -> str:
         1) The NMAP scans must be done from a pentester point of view
         2) The final output must be minimal according to the format given.
         3) The final output must be kept to a minimal.
-        4) If a value not found in the scan just mention an empty string.
-        5) Analyze everything even the smallest of data.
-        6) Completely analyze the data provided and give a confirm answer using the output format.
+        2) If a value not found in the scan just mention an 'nothing found' string.
+        3) Analyze everything even the smallest of data.
+        4) Completely analyze the data provided and give a confirm answer using the output format.
 
         The output format:
         {{
@@ -117,7 +109,6 @@ def BardAI(key: str, data: Any) -> str:
 
 
 def chat_with_api(api_url, user_message, user_instruction, model_name, file_name=None):
-    # Prepare the request data in JSON format
     data = {
         'user_message': user_message,
         'model_name': model_name,
@@ -127,105 +118,14 @@ def chat_with_api(api_url, user_message, user_instruction, model_name, file_name
 
     # Send the POST request to the API
     response = requests.post(api_url, json=data)
-
-    # Check if the request was successful (status code 200)
     if response.status_code == 200:
         return response.json()['bot_response']
     else:
-        # If there was an error, print the error message
         print(f"Error: {response.status_code} - {response.text}")
         return None
 
 
-'''def Llama_AI(data: str):
-    api_url = 'http://localhost:5000/api/chatbot'
-
-    user_instruction = """
-    Do a NMAP scan analysis on the provided NMAP scan information. The NMAP output must return in a asked format accorging to the provided output format. The data must be accurate in regards towards a pentest report.
-    The data must follow the following rules:
-    1) The NMAP scans must be done from a pentester point of view
-    2) The final output must be minimal according to the format given.
-    3) The final output must be kept to a minimal.
-    4) If a value not found in the scan just mention an empty string.
-    5) Analyze everything even the smallest of data.
-    6) Completely analyze the data provided and give a confirm answer using the output format.
-    7) mention all the data you found in the output format provided so that regex can be used on it.
-    8) avoid unnecessary explaination.
-    9) the critical score must be calculated based on the CVE if present or by the nature of the services open
-    10) the os information must contain the OS used my the target.
-    11) the open ports must include all the open ports listed in the data[tcp] and varifying if it by checking its states value.  you should not negect even one open port.
-    12) the vulnerable services can be determined via speculation of the service nature or by analyzing the CVE's found.
-    The output format:
-        critical score:
-        - Give info on the criticality
-        "os information":
-        - List out the OS information
-        "open ports and services":
-        - List open ports
-        - List open ports services
-        "vulnerable service":
-        - Based on CVEs or nature of the ports opened list the vulnerable services
-        "found cve":
-        - List the CVE's found and list the main issues.
-    """
-    user_message = f"""
-        NMAP Data to be analyzed: {data}
-    """
-    model_name = "TheBloke/Llama-2-7B-Chat-GGML"
-    file_name = "llama-2-7b-chat.ggmlv3.q4_K_M.bin"
-    bot_response = chat_with_api(api_url, user_message, user_instruction, model_name, file_name)
-
-    if bot_response:
-        return bot_response'''
-
-
-'''def GPT_AI(key: str, data: Any) -> str:
-    openai.api_key = key
-    try:
-        prompt = f"""
-        Do a NMAP scan analysis on the provided NMAP scan information
-        The NMAP output must return in a JSON format accorging to the provided
-        output format. The data must be accurate in regards towards a pentest report.
-        The data must follow the following rules:
-        1) The NMAP scans must be done from a pentester point of view
-        2) The final output must be minimal according to the format given.
-        3) The final output must be kept to a minimal.
-        4) If a value not found in the scan just mention an empty string.
-        5) Analyze everything even the smallest of data.
-        6) Completely analyze the data provided and give a confirm answer using the output format.
-
-        The output format:
-        {{
-            "critical score": [""],
-            "os information": [""],
-            "open ports": [""],
-            "open services": [""],
-            "vulnerable service": [""],
-            "found cve": [""]
-        }}
-
-        NMAP Data to be analyzed: {data}
-        """
-        # A structure for the request
-        messages = [{"content": prompt, "role": "Security Analyst"}]
-        # A structure for the request
-        response = openai.ChatCompletion.create(
-            model=model_engine,
-            messages=messages,
-            max_tokens=2500,
-            n=1,
-            stop=None,
-        )
-        response = response['choices'][0]['message']['content']
-        print(response)
-        return str(extract_data(str(response)))
-    except KeyboardInterrupt:
-        print("Bye")
-        quit()'''
-
-
 def p_scanner(ip: Optional[str], profile: int, akey: Optional[str], bkey: Optional[str], AI: str) -> Any:
-    # Handle the None case
     profile_argument = ""
     # The port profiles or scan types user can choose
     if profile == 1:
@@ -240,7 +140,7 @@ def p_scanner(ip: Optional[str], profile: int, akey: Optional[str], bkey: Option
         profile_argument = '-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln'
     else:
         raise ValueError(f"Invalid Argument: {profile}")
-    # The scanner with GPT Implemented
+    
     nm.scan('{}'.format(ip), arguments='{}'.format(profile_argument))
     json_data = nm.analyse_nmap_xml_scan()
     analyze = json_data["scan"]
@@ -257,16 +157,4 @@ def p_scanner(ip: Optional[str], profile: int, akey: Optional[str], bkey: Option
         response = None
 
     return response
-    '''match AI:
-        case 'bard':
-            try:
-                if bkey is not None:
-                    pass
-                else:
-                    raise ValueError("KeyNotFound: Key Not Provided")
-                response = BardAI(bkey, analyze)
-            except KeyboardInterrupt:
-                print("Bye")
-                quit()'''
-
-    return response
+    

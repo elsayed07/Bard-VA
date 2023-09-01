@@ -17,9 +17,52 @@ from commands.subdomain import sub
 console = Console()
 load_dotenv()
 
-# The API Keys
 bkey = os.getenv('BARD_API_KEY')  # BardAPI KEY
 gkey = os.getenv('GEOIP_API_KEY')  # GeoIP API
+
+def main(target: Any) -> None:
+    cowsay.cow('BVA Usage in progress...')
+    if target is not None:
+        pass
+    else:
+        target = '127.0.0.1'
+    try:
+        if choice == "help":
+            help_menu()
+        elif menu is True:
+            menu_term()
+        else:
+            match attack:
+                case 'geo':
+                    geo_output: str = geoip(gkey, target)
+                    GEOIP_to_table(str(geo_output))
+                case 'nmap':
+                    match profile:
+                        case 1:
+                            p1_out: str = p_scanner(target, 1, bkey, ai)
+                            print_output("Nmap", p1_out, ai)
+                        case 2:
+                            p2_out: str = p_scanner(target, 2, bkey, ai)
+                            print_output("Nmap", p2_out, ai)
+                        case 3:
+                            p3_out: str = p_scanner(target, 3, bkey, ai)
+                            print_output("Nmap", p3_out, ai)
+                        case 4:
+                            p4_out: str = p_scanner(target, 4, bkey, ai)
+                            print_output("Nmap", p4_out, ai)
+                        case 5:
+                            p5_out: str = p_scanner(target, 5, bkey, ai)
+                            print_output("Nmap", p5_out, ai)
+                case 'dns':
+                    dns_output: str = dnsr(target, bkey, ai)
+                    print_output("DNS", dns_output, ai)
+                case 'sub':
+                    sub_output: str = sub(target, list_loc)
+                    console.print(sub_output, style="bold underline")
+    except KeyboardInterrupt:
+        console.print_exception("Bye")
+        quit()
+
 
 parser = argparse.ArgumentParser(
     description='Python-Nmap and Bard intigrated Vulnerability scanner')
@@ -82,7 +125,7 @@ def clearscr() -> None:
 
         
 def help_menu() -> None:
-    table = Table(title="Help Menu for GVA")
+    table = Table(title="Help Menu for BVA")
     table.add_column("Options", style="cyan")
     table.add_column("Input Type", style="green")
     table.add_column("Argument Input", style="green")
@@ -108,7 +151,7 @@ def help_menu() -> None:
 def GEOIP_to_table(json_data: str) -> Any:
     data = json.loads(json_data)
 
-    table = Table(title="GVA Report for GeoIP", show_header=True, header_style="bold magenta")
+    table = Table(title="BVA Report for GeoIP", show_header=True, header_style="bold magenta")
     table.add_column("Identifiers", style="cyan")
     table.add_column("Data", style="green")
 
@@ -393,7 +436,7 @@ def menu_term() -> None:
 def print_output(attack_type: str, jdata: str, ai: str) -> Any:
     if ai == 'bard':
         data = json.loads(jdata)
-        table = Table(title=f"GVA Report for {attack_type}", show_header=True, header_style="bold magenta")
+        table = Table(title=f"BVA Report for {attack_type}", show_header=True, header_style="bold magenta")
         table.add_column("Variables", style="cyan")
         table.add_column("Results", style="green")
 
@@ -402,51 +445,6 @@ def print_output(attack_type: str, jdata: str, ai: str) -> Any:
         console.print(table)
     else:
         print(Panel(jdata))
-
-
-def main(target: Any) -> None:
-    cowsay.cow('GVA Usage in progress...')
-    if target is not None:
-        pass
-    else:
-        target = '127.0.0.1'
-    try:
-        if choice == "help":
-            help_menu()
-        elif menu is True:
-            menu_term()
-        else:
-            match attack:
-                case 'geo':
-                    geo_output: str = geoip(gkey, target)
-                    GEOIP_to_table(str(geo_output))
-                case 'nmap':
-                    match profile:
-                        case 1:
-                            p1_out: str = p_scanner(target, 1, bkey, ai)
-                            print_output("Nmap", p1_out, ai)
-                        case 2:
-                            p2_out: str = p_scanner(target, 2, bkey, ai)
-                            print_output("Nmap", p2_out, ai)
-                        case 3:
-                            p3_out: str = p_scanner(target, 3, bkey, ai)
-                            print_output("Nmap", p3_out, ai)
-                        case 4:
-                            p4_out: str = p_scanner(target, 4, bkey, ai)
-                            print_output("Nmap", p4_out, ai)
-                        case 5:
-                            p5_out: str = p_scanner(target, 5, bkey, ai)
-                            print_output("Nmap", p5_out, ai)
-                case 'dns':
-                    dns_output: str = dnsr(target, bkey, ai)
-                    print_output("DNS", dns_output, ai)
-                case 'sub':
-                    sub_output: str = sub(target, list_loc)
-                    console.print(sub_output, style="bold underline")
-    except KeyboardInterrupt:
-        console.print_exception("Bye")
-        quit()
-
 
 if __name__ == "__main__":
     main(target)
