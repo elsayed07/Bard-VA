@@ -62,16 +62,16 @@ def extract_data(json_string: str) -> Any:
 
 def BardAI(key: str, data: Any) -> str:
     prompt = f"""
-        Do a NMAP scan analysis on the provided NMAP scan information
-        The NMAP output must return in a JSON format accorging to the provided
-        output format. The data must be accurate in regards towards a pentest report.
-        The data must follow the following rules:
-        1) The NMAP scans must be done from a pentester point of view
-        2) The final output must be minimal according to the format given.
-        3) The final output must be kept to a minimal.
-        2) If a value not found in the scan just mention an 'nothing found' string.
-        3) Analyze everything even the smallest of data.
-        4) Completely analyze the data provided and give a confirm answer using the output format.
+        Perform an in-depth analysis of the NMAP scan data provided, 
+        ensuring that the resulting NMAP output is formatted as JSON and 
+        aligns with the requirements of a comprehensive penetration test report.
+        Adhere to the following guidelines:
+        1. Approach NMAP scans from a penetration tester's perspective.
+        2. Maintain minimalism in the final output while adhering to the specified format.
+        3. Thoroughly examine even the most minute data points.
+        4. Perform a comprehensive analysis of the provided data,
+        presenting a definitive response in accordance with the specified output format.
+        In cases where data is absent or nothing found, indicate 'nothing found'.
 
         The output format:
         {{

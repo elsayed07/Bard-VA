@@ -1,6 +1,6 @@
 ## Introduction
 
-The Bard Vulnerability Assessment application serves as a proof-of-concept (PoC) tool, showcasing the practical application of AI in producing precise vulnerability analysis results. This application seamlessly incorporates multiple modules, such as the Bard API, Python-Nmap, and DNSResolver, to conduct comprehensive network vulnerability assessments, DNS enumeration, and other related tasks.
+The Bard Vulnerability Assessment application serves as a proof-of-concept (PoC) tool, showcasing the practical application of AI (LLMs) in producing precise vulnerability analysis results. This application seamlessly incorporates multiple modules, such as the Bard API, Python-Nmap, and DNSResolver, to conduct comprehensive network vulnerability assessments, DNS enumeration, and other related tasks.
 
 ## Features
 
