@@ -6,8 +6,78 @@ import requests
 from rich.progress import track
 
 model_engine = "text-davinci-003"    
+def extract_data(json_string: str) -> Any:
+    # Define the regular expression patterns for individual values
+    A_pattern = r'"A": \["(.*?)"\]'
+    AAA_pattern = r'"AAA: \["(.*?)"\]'
+    NS_pattern = r'"NS": \["(.*?)"\]'
+    MX_pattern = r'"MX": \["(.*?)"\]'
+    PTR_pattern = r'"PTR": \["(.*?)"\]'
+    SOA_pattern = r'"SOA": \["(.*?)"\]'
+    TXT_pattern = r'"TXT": \["(.*?)"\]'
+    notes_and_recommendations_pattern = r'"notes and recommendations": .*'
 
-def extract_data(json_string: str) -> str:
+    # Initialize variables for extracted data
+    A = None
+    AAA = None
+    NS = None
+    MX = None
+    PTR = None
+    SOA = None
+    TXT = None
+    notes_and_recommendations= None
+
+    # Extract individual values using patterns
+    match = re.search(A_pattern, json_string)
+    if match:
+        A = match.group(1)
+
+    match = re.search(AAA_pattern, json_string)
+    if match:
+        AAA = match.group(1)
+
+    match = re.search(NS_pattern, json_string)
+    if match:
+        NS = match.group(1)
+
+    match = re.search(MX_pattern, json_string)
+    if match:
+        MX = match.group(1)
+
+    match = re.search(PTR_pattern, json_string)
+    if match:
+        PTR = match.group(1)
+
+    match = re.search(SOA_pattern, json_string)
+    if match:
+        SOA = match.group(1)
+
+    match = re.search(TXT_pattern, json_string)
+    if match:
+        TXT = match.group(1)
+        
+    match = re.search(notes_and_recommendations_pattern, json_string)
+    if match:
+        notes_and_recommendations = match.group(0)
+
+    # Create a dictionary to store the extracted data
+    data = {
+        "A": A,
+        "AAA": AAA,
+        "NS": NS,
+        "MX": MX,
+        "PTR": PTR,
+        "SOA": SOA,
+        "TXT": TXT,
+        "notes and recommendation": notes_and_recommendations
+    }
+
+    # Convert the dictionary to JSON format
+    json_output = json.dumps(data)
+
+    return json_output
+
+'''def extract_data(json_string: str) -> str:
     record_patterns = {
         "A": r'"A": \["(.*?)"\]',
         "AAA": r'"AAA: \["(.*?)"\]',
@@ -15,7 +85,10 @@ def extract_data(json_string: str) -> str:
         "MX": r'"MX": \["(.*?)"\]',
         "PTR": r'"PTR": \["(.*?)"\]',
         "SOA": r'"SOA": \["(.*?)"\]',
-        "TXT": r'"TXT": \["(.*?)"\]'
+        "TXT": r'"TXT": \["(.*?)"\]',
+        "notes and recommendations": r'"notes and recommendations": .*'
+        
+    
     }
 
     data = {}
@@ -24,9 +97,9 @@ def extract_data(json_string: str) -> str:
         match = re.search(pattern, json_string)
         if match:
             data[key] = match.group(1)
-
+            
     json_output = json.dumps(data)
-    return json_output
+    return json_output'''
 
         
 def generate_bard_text(key: str, prompt: str) -> str:
@@ -52,8 +125,10 @@ def BardAI(api_key: str, dns_data: Any) -> str:
         output format. The data must be accurate in regards towards a pentest report.
         The data must follow the following rules:
         1) The DNS scans must be done from a pentester point of view
-        2) The final output must be minimal according to the format given
-        3) The final output must be kept to a minimal
+        2) at least write two line about the scan
+        3) The final output must be minimal according to the format given
+        4) The final output must be kept to a minimal
+        5) The final output must has notes and recommendations
 
         The output format:
         {{
@@ -63,7 +138,8 @@ def BardAI(api_key: str, dns_data: Any) -> str:
             "MX": [""],
             "PTR": [""],
             "SOA": [""],
-            "TXT": [""]
+            "TXT": [""],
+            "notes and recommendations":[""]
         }}
         DNS Data to be analyzed: {dns_data}
         """

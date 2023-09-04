@@ -19,60 +19,15 @@ load_dotenv()
 
 bkey = os.getenv('BARD_API_KEY')  # BardAPI KEY
 gkey = os.getenv('GEOIP_API_KEY')  # GeoIP API
-
-def main(target: Any) -> None:
-    cowsay.cow('BVA Usage in progress...')
-    if target is not None:
-        pass
-    else:
-        target = '127.0.0.1'
-    try:
-        if choice == "help":
-            help_menu()
-        elif menu is True:
-            menu_term()
-        else:
-            match attack:
-                case 'geo':
-                    geo_output: str = geoip(gkey, target)
-                    GEOIP_to_table(str(geo_output))
-                case 'nmap':
-                    match profile:
-                        case 1:
-                            p1_out: str = p_scanner(target, 1, bkey, ai)
-                            print_output("Nmap", p1_out, ai)
-                        case 2:
-                            p2_out: str = p_scanner(target, 2, bkey, ai)
-                            print_output("Nmap", p2_out, ai)
-                        case 3:
-                            p3_out: str = p_scanner(target, 3, bkey, ai)
-                            print_output("Nmap", p3_out, ai)
-                        case 4:
-                            p4_out: str = p_scanner(target, 4, bkey, ai)
-                            print_output("Nmap", p4_out, ai)
-                        case 5:
-                            p5_out: str = p_scanner(target, 5, bkey, ai)
-                            print_output("Nmap", p5_out, ai)
-                case 'dns':
-                    dns_output: str = dnsr(target, bkey, ai)
-                    print_output("DNS", dns_output, ai)
-                case 'sub':
-                    sub_output: str = sub(target, list_loc)
-                    console.print(sub_output, style="bold underline")
-    except KeyboardInterrupt:
-        console.print_exception("Bye")
-        quit()
-
-
 parser = argparse.ArgumentParser(
     description='Python-Nmap and Bard intigrated Vulnerability scanner')
 parser.add_argument('--target', metavar='target', type=str,
                     help='Target IP or hostname')
 parser.add_argument('--profile', metavar='profile', type=int, default=1,
                     help='Enter Profile of scan 1-5 (Default: 1)', required=False)
-parser.add_argument('--attack', metavar='attack', type=str,
+parser.add_argument('--scan', metavar='scan', type=str,
                     help='''
-                    Enter Attack type nmap, dns or sub.
+                    Enter scan type nmap, dns or sub.
                     sub - Subdomain Enumeration using the default array.
                     dns - to perform DNS Enumeration and get openion from Bard
                     ''', required=False)
@@ -98,7 +53,7 @@ args = parser.parse_args()
 
 target = args.target
 profile = args.profile
-attack = args.attack
+scan = args.scan
 choice = args.r
 list_loc = args.list
 ai = args.ai
@@ -108,6 +63,61 @@ bkey_set = ""
 t = ""
 profile_num = ""
 ai_set = ""
+
+
+def help_menu() -> None:
+    table = Table(title="Help Menu for BVA")
+    table.add_column("Options", style="cyan")
+    table.add_column("Input Type", style="green")
+    table.add_column("Argument Input", style="green")
+    table.add_column("Discription", style="green")
+    table.add_column("Other internal options", style="green")
+    table.add_row("scan", "--scan", "TXT/STRING",
+                  "The scan the user whants to run", "sub / dns / nmap / geo")
+    table.add_row("Target", "--target", "IP/HOSTNAME",
+                  "The target of the user", "None")
+    table.add_row("Domain List", "--list", "Path to text file",
+                  "subdomain dictionary list", "Path")
+    table.add_row("Profile", "--profile", "INT (1-5)",
+                  "The type of Nmap Scan the user intends", "None")
+    table.add_row("AI", "--ai", "STRING",
+                  "Choose your AI of choice", "bard")
+    table.add_row("menu", "--menu", "BOOL",
+                  "Descriptive UI menu", "True / False (Default)")
+    table.add_row("Rich Help", "--r", "STRING",
+                  "Pretty Help menu", "help")
+    console.print(table)
+
+
+def menu_term() -> None:
+    try:
+        table = Table()
+        table.add_column("Options", style="cyan")
+        table.add_column("Utility", style="green")
+        table.add_row("1", "Nmap Enum")
+        table.add_row("2", "DNS Enum")
+        table.add_row("3", "Subdomain Enum")
+        table.add_row("4", "GEO-IP Enum")
+        table.add_row("q", "Quit")
+        console.print(table)
+        option = input("Enter your choice: ")
+        match option:
+            case "1":
+                clearscr()
+                nmap_menu()
+            case "2":
+                clearscr()
+                dns_menu()
+            case "3":
+                clearscr()
+                sub_menu()
+            case "4":
+                clearscr()
+                geo_menu()
+            case "q":
+                quit()
+    except KeyboardInterrupt:
+        print(Panel("Exiting Program"))
 
 
 def clearscr() -> None:
@@ -123,48 +133,7 @@ def clearscr() -> None:
     except Exception:
         pass    
 
-        
-def help_menu() -> None:
-    table = Table(title="Help Menu for BVA")
-    table.add_column("Options", style="cyan")
-    table.add_column("Input Type", style="green")
-    table.add_column("Argument Input", style="green")
-    table.add_column("Discription", style="green")
-    table.add_column("Other internal options", style="green")
-    table.add_row("Attack", "--attack", "TXT/STRING",
-                  "The Attack the user whants to run", "sub / dns / nmap / geo")
-    table.add_row("Target", "--target", "IP/HOSTNAME",
-                  "The target of the user", "None")
-    table.add_row("Domain List", "--list", "Path to text file",
-                  "subdomain dictionary list", "Path")
-    table.add_row("Profile", "--profile", "INT (1-5)",
-                  "The type of Nmap Scan the user intends", "None")
-    table.add_row("AI", "--ai", "STRING",
-                  "Choose your AI of choice", "bard")
-    table.add_row("menu", "--menu", "BOOL",
-                  "Interactive UI menu", "True / False (Default)")
-    table.add_row("Rich Help", "--r", "STRING",
-                  "Pritty Help menu", "help")
-    console.print(table)
-    
-    
-def GEOIP_to_table(json_data: str) -> Any:
-    data = json.loads(json_data)
-
-    table = Table(title="BVA Report for GeoIP", show_header=True, header_style="bold magenta")
-    table.add_column("Identifiers", style="cyan")
-    table.add_column("Data", style="green")
-
-    flattened_data: dict = flatten_json(data, separator='.')
-
-    for key, value in flattened_data.items():
-        value_str = str(value)
-        table.add_row(key, value_str)
-
-    console = Console()
-    console.print(table)
-    
-    
+               
 def flatten_json(data: Any, separator: Any = '.') -> Any:
     flattened_data = {}
     for key, value in data.items():
@@ -191,7 +160,7 @@ def nmap_menu() -> None:
         table.add_row("2", "Set Target")
         table.add_row("3", "Set Profile")
         table.add_row("4", "Show options")
-        table.add_row("5", "Run Attack")
+        table.add_row("5", "Run scan")
         table.add_row("r", "Return")
         console.print(table)
         option = input("Enter your choice: ")
@@ -219,12 +188,13 @@ def nmap_menu() -> None:
                 clearscr()
                 table1 = Table()
                 table1.add_column("Options", style="cyan")
-                table1.add_column("Value", style="green")
-                table1.add_row("1", "-Pn -sV -T4 -O -F")
-                table1.add_row("2", "-Pn -T4 -A -v")
-                table1.add_row("3", "-Pn -sS -sU -T4 -A -v")
-                table1.add_row("4", "-Pn -p- -T4 -A -v")
-                table1.add_row("5", "-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln")
+                table1.add_column("Nmap command", style="green")
+                table1.add_column("Description", style="green")
+                table1.add_row("1", "Effective Scan", "-Pn -sV -T4 -O -F")
+                table1.add_row("2", "Simple Scan","-Pn -T4 -A -v")
+                table1.add_row("3", "Low Power Sacn", "-Pn -sS -sU -T4 -A -v")
+                table1.add_row("4", "Partial Intense Scan", "-Pn -p- -T4 -A -v")
+                table1.add_row("5", "complete Intense Scan", "-Pn -sS -sU -T4 -A -PE -PP  -PY -g 53 --script=vuln")
                 print(Panel(table1))
                 profile_num = input("Enter your Profile: ")
                 print(Panel(f"Profile Set {profile_num}"))
@@ -263,7 +233,7 @@ def dns_menu() -> None:
         table.add_row("1", "AI Option")
         table.add_row("2", "Set Target")
         table.add_row("3", "Show options")
-        table.add_row("4", "Run Attack")
+        table.add_row("4", "Run scan")
         table.add_row("r", "Return")
         console.print(table)
         option = input("Enter your choice: ")
@@ -307,53 +277,6 @@ def dns_menu() -> None:
         print(Panel("Exiting Program"))
 
 
-def geo_menu() -> None:
-    try:
-        global keyset
-        global t
-        global profile_num
-        table = Table()
-        table.add_column("Options", style="cyan")
-        table.add_column("Utility", style="green")
-        table.add_row("1", "ADD API Key")
-        table.add_row("2", "Set Target")
-        table.add_row("3", "Show options")
-        table.add_row("4", "Run Attack")
-        table.add_row("r", "Return")
-        console.print(table)
-        option = input("Enter your choice: ")
-        match option:
-            case "1":
-                clearscr()
-                keyset = input("Enter GEO-IP API: ")
-                print(Panel(f"GEOIP API Key Set: {keyset}"))
-                geo_menu()
-            case "2":
-                clearscr()
-                print(Panel("Set Target Hostname or IP"))
-                t = input("Enter Target: ")
-                print(Panel(f"Target Set: {t}"))
-                geo_menu()
-            case "3":
-                clearscr()
-                table1 = Table()
-                table1.add_column("Options", style="cyan")
-                table1.add_column("Value", style="green")
-                table1.add_row("API Key", str(keyset))
-                table1.add_row("Target", str(t))
-                print(Panel(table1))
-                geo_menu()
-            case "4":
-                clearscr()
-                geo_output: str = geoip(keyset, t)
-                GEOIP_to_table(str(geo_output))
-            case "r":
-                clearscr()
-                menu_term()
-    except KeyboardInterrupt:
-        print(Panel("Exiting Program"))
-        
-        
 def sub_menu() -> None:
     try:
         global list_loc
@@ -365,7 +288,7 @@ def sub_menu() -> None:
         table.add_row("1", "ADD Subdomain list")
         table.add_row("2", "Set Target")
         table.add_row("3", "Show options")
-        table.add_row("4", "Run Attack")
+        table.add_row("4", "Run scan")
         table.add_row("r", "Return")
         console.print(table)
         option = input("Enter your choice: ")
@@ -402,41 +325,75 @@ def sub_menu() -> None:
         print(Panel("Exiting Program"))
 
 
-def menu_term() -> None:
+def geo_menu() -> None:
     try:
+        global keyset
+        global t
+        global profile_num
         table = Table()
         table.add_column("Options", style="cyan")
         table.add_column("Utility", style="green")
-        table.add_row("1", "Nmap Enum")
-        table.add_row("2", "DNS Enum")
-        table.add_row("3", "Subdomain Enum")
-        table.add_row("4", "GEO-IP Enum")
-        table.add_row("q", "Quit")
+        table.add_row("1", "ADD API Key")
+        table.add_row("2", "Set Target")
+        table.add_row("3", "Show options")
+        table.add_row("4", "Run scan")
+        table.add_row("r", "Return")
         console.print(table)
         option = input("Enter your choice: ")
         match option:
             case "1":
                 clearscr()
-                nmap_menu()
+                keyset = input("Enter GEO-IP API: ")
+                print(Panel(f"GEOIP API Key Set: {keyset}"))
+                geo_menu()
             case "2":
                 clearscr()
-                dns_menu()
+                print(Panel("Set Target Hostname or IP"))
+                t = input("Enter Target: ")
+                print(Panel(f"Target Set: {t}"))
+                geo_menu()
             case "3":
                 clearscr()
-                sub_menu()
+                table1 = Table()
+                table1.add_column("Options", style="cyan")
+                table1.add_column("Value", style="green")
+                #table1.add_column("Nmap command", style="green")
+                table1.add_row("API Key", str(keyset))
+                table1.add_row("Target", str(t))
+                print(Panel(table1))
+                geo_menu()
             case "4":
                 clearscr()
-                geo_menu()
-            case "q":
-                quit()
+                geo_output: str = geoip(keyset, t)
+                GEOIP_to_table(str(geo_output))
+            case "r":
+                clearscr()
+                menu_term()
     except KeyboardInterrupt:
         print(Panel("Exiting Program"))
+        
 
+def GEOIP_to_table(json_data: str) -> Any:
+    data = json.loads(json_data)
 
-def print_output(attack_type: str, jdata: str, ai: str) -> Any:
+    table = Table(title="BVA Report for GeoIP", show_header=True, header_style="bold magenta")
+    table.add_column("Identifiers", style="cyan")
+    table.add_column("Data", style="green")
+
+    flattened_data: dict = flatten_json(data, separator='.')
+
+    for key, value in flattened_data.items():
+        value_str = str(value)
+        table.add_row(key, value_str)
+
+    console = Console()
+    console.print(table)
+
+        
+def print_output(scan_type: str, jdata: str, ai: str) -> Any:
     if ai == 'bard':
         data = json.loads(jdata)
-        table = Table(title=f"BVA Report for {attack_type}", show_header=True, header_style="bold magenta")
+        table = Table(title=f"BVA Report for {scan_type}", show_header=True, header_style="bold magenta")
         table.add_column("Variables", style="cyan")
         table.add_column("Results", style="green")
 
@@ -445,6 +402,51 @@ def print_output(attack_type: str, jdata: str, ai: str) -> Any:
         console.print(table)
     else:
         print(Panel(jdata))
+        
+
+def main(target: Any) -> None:
+    #cowsay.cow('BVA Usage in progress...')
+    print("BVA Usage in progress...")
+    if target is not None:
+        pass
+    else:
+        target = '127.0.0.1'
+    try:
+        if choice == "help":
+            help_menu()
+        elif menu is True:
+            menu_term()
+        else:
+            match scan:
+                case 'geo':
+                    geo_output: str = geoip(gkey, target)
+                    GEOIP_to_table(str(geo_output))
+                case 'nmap':
+                    match profile:
+                        case 1:
+                            p1_out: str = p_scanner(target, 1, bkey, ai)
+                            print_output("Nmap", p1_out, ai)
+                        case 2:
+                            p2_out: str = p_scanner(target, 2, bkey, ai)
+                            print_output("Nmap", p2_out, ai)
+                        case 3:
+                            p3_out: str = p_scanner(target, 3, bkey, ai)
+                            print_output("Nmap", p3_out, ai)
+                        case 4:
+                            p4_out: str = p_scanner(target, 4, bkey, ai)
+                            print_output("Nmap", p4_out, ai)
+                        case 5:
+                            p5_out: str = p_scanner(target, 5, bkey, ai)
+                            print_output("Nmap", p5_out, ai)
+                case 'dns':
+                    dns_output: str = dnsr(target, bkey, ai)
+                    print_output("DNS", dns_output, ai)
+                case 'sub':
+                    sub_output: str = sub(target, list_loc)
+                    console.print(sub_output, style="bold underline")
+    except KeyboardInterrupt:
+        console.print_exception("Bye")
+        quit()        
 
 if __name__ == "__main__":
     main(target)

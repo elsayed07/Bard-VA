@@ -4,8 +4,8 @@ from typing import Any, Optional
 import nmap
 import requests
 
-model_engine = "text-davinci-003"
 nm = nmap.PortScanner()
+model_engine = "text-davinci-003"
 
 def extract_data(json_string: str) -> Any:
     critical_score_pattern = r'"critical score": \["(.*?)"\]'
@@ -14,6 +14,8 @@ def extract_data(json_string: str) -> Any:
     open_services_pattern = r'"open services": \["(.*?)"\]'
     vulnerable_service_pattern = r'"vulnerable service": \["(.*?)"\]'
     found_cve_pattern = r'"found cve": \["(.*?)"\]'
+    notes_and_recommendations_pattern = r'"notes and recommendations": .*'
+    #\["(.*?)"\]'
 
     critical_score = None
     os_information = None
@@ -21,6 +23,7 @@ def extract_data(json_string: str) -> Any:
     open_services = None
     vulnerable_service = None
     found_cve = None
+    notes_and_recommendations = None
 
     match = re.search(critical_score_pattern, json_string)
     if match:
@@ -45,6 +48,10 @@ def extract_data(json_string: str) -> Any:
     match = re.search(found_cve_pattern, json_string)
     if match:
         found_cve = match.group(1)
+        
+    match = re.search(notes_and_recommendations_pattern, json_string)
+    if match:
+        notes_and_recommendations = match.group(0)
 
     data = {
         "critical score": critical_score,
@@ -52,14 +59,16 @@ def extract_data(json_string: str) -> Any:
         "open ports": open_ports,
         "open services": open_services,
         "vulnerable service": vulnerable_service,
-        "found cve": found_cve
+        "found cve": found_cve,
+        "notes and recommendations": notes_and_recommendations
+        
     }
 
     json_output = json.dumps(data)
 
     return json_output
 
-
+# 
 def BardAI(key: str, data: Any) -> str:
     prompt = f"""
         Perform an in-depth analysis of the NMAP scan data provided, 
@@ -71,7 +80,9 @@ def BardAI(key: str, data: Any) -> str:
         3. Thoroughly examine even the most minute data points.
         4. Perform a comprehensive analysis of the provided data,
         presenting a definitive response in accordance with the specified output format.
-        In cases where data is absent or nothing found, indicate 'nothing found'.
+        In cases where data is absent or nothing found, indicate none.
+        5. indicate your recommendations about the scan
+
 
         The output format:
         {{
@@ -81,6 +92,7 @@ def BardAI(key: str, data: Any) -> str:
             "open services": [""],
             "vulnerable service": [""],
             "found cve": [""]
+            "notes and recommendations":[""]
         }}
 
         NMAP Data to be analyzed: {data}
@@ -97,7 +109,14 @@ def BardAI(key: str, data: Any) -> str:
             "text": prompt
         }
     }
+    '''# Extract and format the recommendations
+    recommendations = data.get("notes and recommendations", [])
+    formatted_recommendations = "\n".join(recommendations)
 
+    # Print the formatted recommendations
+    print("Recommendations:")
+    print(formatted_recommendations)'''
+    
     response = requests.post(url, json=data, headers=headers)
 
     if response.status_code == 200:
