@@ -94,10 +94,22 @@ Before you begin the journey, make sure to obtain an API key. Begin by visiting 
 
 ### Output
 
-.
-.
-.
-.
+- Nmap scan output:
+
+![Getting Started](./images/nmap.png)
+
+- DNS scan output:
+
+![Getting Started](./images/dns.png)
+
+- Subdomain Enumeration:
+
+![Getting Started](./images/sub.PNG)
+
+- GEO Location output:
+
+![Getting Started](./images/geo.PNG)
+
 
 ## Advantage
 
