@@ -1,9 +1,7 @@
 import argparse
 import json
 import os
-import platform
 from typing import Any
-import cowsay
 from dotenv import load_dotenv
 from rich import print
 from rich.console import Console
@@ -16,41 +14,21 @@ from commands.subdomain import sub
 
 console = Console()
 load_dotenv()
-
 bkey = os.getenv('BARD_API_KEY')  # BardAPI KEY
 gkey = os.getenv('GEOIP_API_KEY')  # GeoIP API
-parser = argparse.ArgumentParser(
-    description='Python-Nmap and Bard intigrated Vulnerability scanner')
-parser.add_argument('--target', metavar='target', type=str,
-                    help='Target IP or hostname')
-parser.add_argument('--profile', metavar='profile', type=int, default=1,
-                    help='Enter Profile of scan 1-5 (Default: 1)', required=False)
-parser.add_argument('--scan', metavar='scan', type=str,
-                    help='''
-                    Enter scan type nmap, dns or sub.
-                    sub - Subdomain Enumeration using the default array.
-                    dns - to perform DNS Enumeration and get openion from Bard
-                    ''', required=False)
-parser.add_argument('--list', metavar='list', type=str,
-                    help='''
-                    The path to the subdomain list file (txt).
-                    ''',
-                    default='lists/default.txt',
-                    required=False)
-parser.add_argument('--r', metavar='r', type=str,
-                    help='Shows a more clean help manu using rich only argument-input is help',
-                    default=help,
-                    required=False)
-parser.add_argument('--menu', metavar='menu', type=bool,
-                    help='Terminal Interactive Menu',
-                    required=False,
-                    default=False)
-parser.add_argument('--ai', metavar='ai', type=str,
-                    help='Terminal Interactive Menu',
-                    required=False,
-                    default='bard')
-args = parser.parse_args()
 
+# Create an argument parser to handle command-line arguments
+parser = argparse.ArgumentParser(description='Python-Nmap and Bard integrated Vulnerability scanner')
+parser.add_argument('--target', metavar='target', type=str, help='Target IP or hostname')
+parser.add_argument('--profile', metavar='profile', type=int, default=1, help='Enter Profile of scan 1-5 (Default: 1)', required=False)
+parser.add_argument('--scan', metavar='scan', type=str, help='Enter scan type nmap, dns or sub.', required=False)
+parser.add_argument('--list', metavar='list', type=str, help='The path to the subdomain list file (txt).', default='lists/default.txt', required=False)
+parser.add_argument('--r', metavar='r', type=str, help='Shows a more clean help menu using rich only argument-input is help', default=help, required=False)
+parser.add_argument('--menu', metavar='menu', type=bool, help='Terminal Interactive Menu', required=False, default=False)
+parser.add_argument('--ai', metavar='ai', type=str, help='Choose your AI of choice', required=False, default='bard')
+
+# Store the values of command-line arguments
+args = parser.parse_args()
 target = args.target
 profile = args.profile
 scan = args.scan
@@ -58,13 +36,12 @@ choice = args.r
 list_loc = args.list
 ai = args.ai
 menu = args.menu
-keyset = ""
-bkey_set = ""
-t = ""
-profile_num = ""
-ai_set = ""
 
-
+# Define a function to clear the screen based on the operating system
+def clearscr() -> None:
+    os.system("cls" if os.name == "nt" else "clear") 
+    
+# Define a function to display the help menu
 def help_menu() -> None:
     table = Table(title="Help Menu for BVA")
     table.add_column("Options", style="cyan")
@@ -88,7 +65,7 @@ def help_menu() -> None:
                   "Pretty Help menu", "help")
     console.print(table)
 
-
+# Define a function for the terminal interactive menu
 def menu_term() -> None:
     try:
         table = Table()
@@ -117,23 +94,9 @@ def menu_term() -> None:
             case "q":
                 quit()
     except KeyboardInterrupt:
-        print(Panel("Exiting Program"))
+        print(Panel("Exiting Program")) 
 
-
-def clearscr() -> None:
-    try:
-        osp = platform.system()
-        match osp:
-            case 'Darwin':
-                os.system("clear")
-            case 'Linux':
-                os.system("clear")
-            case 'Windows':
-                os.system("cls")
-    except Exception:
-        pass    
-
-               
+# Define a function to flatten nested JSON data               
 def flatten_json(data: Any, separator: Any = '.') -> Any:
     flattened_data = {}
     for key, value in data.items():
@@ -145,7 +108,7 @@ def flatten_json(data: Any, separator: Any = '.') -> Any:
             flattened_data[key] = value
     return flattened_data
 
-
+# Define a function for the Nmap menu
 def nmap_menu() -> None:
     try:
         global keyset
@@ -219,7 +182,7 @@ def nmap_menu() -> None:
     except KeyboardInterrupt:
         print(Panel("Exiting Program"))
         
-        
+# Define a function for the DNS menu        
 def dns_menu() -> None:
     try:
         global keyset
@@ -276,7 +239,7 @@ def dns_menu() -> None:
     except KeyboardInterrupt:
         print(Panel("Exiting Program"))
 
-
+# Define a function for the Subdomain menu
 def sub_menu() -> None:
     try:
         global list_loc
@@ -324,7 +287,7 @@ def sub_menu() -> None:
     except KeyboardInterrupt:
         print(Panel("Exiting Program"))
 
-
+# Define a function for the GEO-IP menu
 def geo_menu() -> None:
     try:
         global keyset
@@ -357,7 +320,6 @@ def geo_menu() -> None:
                 table1 = Table()
                 table1.add_column("Options", style="cyan")
                 table1.add_column("Value", style="green")
-                #table1.add_column("Nmap command", style="green")
                 table1.add_row("API Key", str(keyset))
                 table1.add_row("Target", str(t))
                 print(Panel(table1))
@@ -372,7 +334,7 @@ def geo_menu() -> None:
     except KeyboardInterrupt:
         print(Panel("Exiting Program"))
         
-
+# Define a function to display GEO-IP scan results in a table
 def GEOIP_to_table(json_data: str) -> Any:
     data = json.loads(json_data)
 
@@ -389,7 +351,7 @@ def GEOIP_to_table(json_data: str) -> Any:
     console = Console()
     console.print(table)
 
-        
+# Define a function to print scan output       
 def print_output(scan_type: str, jdata: str, ai: str) -> Any:
     if ai == 'bard':
         data = json.loads(jdata)
@@ -403,9 +365,8 @@ def print_output(scan_type: str, jdata: str, ai: str) -> Any:
     else:
         print(Panel(jdata))
         
-
+# Define the main function
 def main(target: Any) -> None:
-    #cowsay.cow('BVA Usage in progress...')
     print("BVA Usage in progress...")
     if target is not None:
         pass

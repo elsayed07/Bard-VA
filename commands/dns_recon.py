@@ -15,7 +15,7 @@ def extract_data(json_string: str) -> Any:
     PTR_pattern = r'"PTR": \["(.*?)"\]'
     SOA_pattern = r'"SOA": \["(.*?)"\]'
     TXT_pattern = r'"TXT": \["(.*?)"\]'
-    notes_and_recommendations_pattern = r'"notes and recommendations": .*'
+    #notes_and_recommendations_pattern = r'"notes and recommendations": .*'
 
     # Initialize variables for extracted data
     A = None
@@ -25,7 +25,7 @@ def extract_data(json_string: str) -> Any:
     PTR = None
     SOA = None
     TXT = None
-    notes_and_recommendations= None
+    #notes_and_recommendations= None
 
     # Extract individual values using patterns
     match = re.search(A_pattern, json_string)
@@ -56,9 +56,6 @@ def extract_data(json_string: str) -> Any:
     if match:
         TXT = match.group(1)
         
-    match = re.search(notes_and_recommendations_pattern, json_string)
-    if match:
-        notes_and_recommendations = match.group(0)
 
     # Create a dictionary to store the extracted data
     data = {
@@ -69,7 +66,7 @@ def extract_data(json_string: str) -> Any:
         "PTR": PTR,
         "SOA": SOA,
         "TXT": TXT,
-        "notes and recommendation": notes_and_recommendations
+        #"notes and recommendation": notes_and_recommendations
     }
 
     # Convert the dictionary to JSON format
@@ -77,37 +74,12 @@ def extract_data(json_string: str) -> Any:
 
     return json_output
 
-'''def extract_data(json_string: str) -> str:
-    record_patterns = {
-        "A": r'"A": \["(.*?)"\]',
-        "AAA": r'"AAA: \["(.*?)"\]',
-        "NS": r'"NS": \["(.*?)"\]',
-        "MX": r'"MX": \["(.*?)"\]',
-        "PTR": r'"PTR": \["(.*?)"\]',
-        "SOA": r'"SOA": \["(.*?)"\]',
-        "TXT": r'"TXT": \["(.*?)"\]',
-        "notes and recommendations": r'"notes and recommendations": .*'
-        
-    
-    }
-
-    data = {}
-
-    for key, pattern in record_patterns.items():
-        match = re.search(pattern, json_string)
-        if match:
-            data[key] = match.group(1)
-            
-    json_output = json.dumps(data)
-    return json_output'''
-
         
 def generate_bard_text(key: str, prompt: str) -> str:
     url = "https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText?key=" + key
 
     headers = {"Content-Type": "application/json"}
     data = {"prompt": {"text": prompt}}
-
     response = requests.post(url, json=data, headers=headers)
 
     if response.status_code == 200:
@@ -120,15 +92,14 @@ def generate_bard_text(key: str, prompt: str) -> str:
 
 def BardAI(api_key: str, dns_data: Any) -> str:
     prompt = f"""
-        Do a DNS analysis on the provided DNS scan information
-        The DNS output must return in a JSON format according to the provided
-        output format. The data must be accurate in regards towards a pentest report.
-        The data must follow the following rules:
-        1) The DNS scans must be done from a pentester point of view
-        2) at least write two line about the scan
-        3) The final output must be minimal according to the format given
-        4) The final output must be kept to a minimal
-        5) The final output must has notes and recommendations
+        Conduct a DNS analysis on the provided DNS scan data. Ensure the DNS output adheres 
+        to the specified JSON format required for the pentest report. Adhere to these guidelines:
+        1. Approach the DNS scans with a pentester's perspective.
+        2. Maintain a minimalist approach in the final output while complying with the designated format.
+        3. Examine even the smallest data details thoroughly.
+        4. Include notes and recommendations in the final output.
+        5. Conduct a thorough analysis of the provided data, delivering a definitive response following the specified output format.
+        6. In cases of missing or unavailable data, clearly indicate its absence.
 
         The output format:
         {{

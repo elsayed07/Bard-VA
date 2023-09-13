@@ -5,15 +5,14 @@ from rich.table import Table
 
 console = Console()
 
-def display_urls(sd_data: list[str], count: int) -> None:
+def display_urls(sd_data: list[str], count: int, target:str) -> None:
     console = Console()
-    table = Table(title=f"GVA Subdomain report. found out of {count}", show_header=True, header_style="bold")
+    table = Table(title=f"BVA Subdomain report of {target} => found out of {count}", show_header=True, header_style="bold")
     table.add_column("Index", justify="right", style="cyan")
     table.add_column("URL", style="green")
     for index, url in enumerate(sd_data):
-        table.add_row(str(index), url)
+        table.add_row(str(index+1), url)
     console.print(table)
-
 
 def sub(target: str, list: str) -> str:
     sd_data = []
@@ -39,6 +38,6 @@ def sub(target: str, list: str) -> str:
         except KeyboardInterrupt:
             print('Ended')
             quit()
-    display_urls(sd_data, count)
+    display_urls(sd_data, count, target)
     return 'Done'
 

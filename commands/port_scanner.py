@@ -68,7 +68,7 @@ def extract_data(json_string: str) -> Any:
 
     return json_output
 
-# 
+
 def BardAI(key: str, data: Any) -> str:
     prompt = f"""
         Perform an in-depth analysis of the NMAP scan data provided, 
@@ -80,10 +80,9 @@ def BardAI(key: str, data: Any) -> str:
         3. Thoroughly examine even the most minute data points.
         4. Perform a comprehensive analysis of the provided data,
         presenting a definitive response in accordance with the specified output format.
-        In cases where data is absent or nothing found, indicate none.
-        5. indicate your recommendations about the scan
-
-
+        In cases where data is absent or nothing found, indicate "none".
+        5. indicate your recommendations about the scan.
+        
         The output format:
         {{
             "critical score": [""],
@@ -109,13 +108,6 @@ def BardAI(key: str, data: Any) -> str:
             "text": prompt
         }
     }
-    '''# Extract and format the recommendations
-    recommendations = data.get("notes and recommendations", [])
-    formatted_recommendations = "\n".join(recommendations)
-
-    # Print the formatted recommendations
-    print("Recommendations:")
-    print(formatted_recommendations)'''
     
     response = requests.post(url, json=data, headers=headers)
 
@@ -134,7 +126,6 @@ def chat_with_api(api_url, user_message, user_instruction, model_name, file_name
         'file_name': file_name,
         'user_instruction': user_instruction
     }
-
     # Send the POST request to the API
     response = requests.post(api_url, json=data)
     if response.status_code == 200:
