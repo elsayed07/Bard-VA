@@ -15,7 +15,6 @@ def extract_data(json_string: str) -> Any:
     PTR_pattern = r'"PTR": \["(.*?)"\]'
     SOA_pattern = r'"SOA": \["(.*?)"\]'
     TXT_pattern = r'"TXT": \["(.*?)"\]'
-    #notes_and_recommendations_pattern = r'"notes and recommendations": .*'
 
     # Initialize variables for extracted data
     A = None
@@ -25,7 +24,6 @@ def extract_data(json_string: str) -> Any:
     PTR = None
     SOA = None
     TXT = None
-    #notes_and_recommendations= None
 
     # Extract individual values using patterns
     match = re.search(A_pattern, json_string)
@@ -66,7 +64,6 @@ def extract_data(json_string: str) -> Any:
         "PTR": PTR,
         "SOA": SOA,
         "TXT": TXT,
-        #"notes and recommendation": notes_and_recommendations
     }
 
     # Convert the dictionary to JSON format
@@ -110,7 +107,6 @@ def BardAI(api_key: str, dns_data: Any) -> str:
             "PTR": [""],
             "SOA": [""],
             "TXT": [""],
-            "notes and recommendations":[""]
         }}
         DNS Data to be analyzed: {dns_data}
         """
